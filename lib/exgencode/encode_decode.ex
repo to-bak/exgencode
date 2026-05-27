@@ -3,11 +3,15 @@ defmodule Exgencode.EncodeDecode do
   Helper functions for generating encoding and decoding functions.
   """
 
-  def create_versioned_encode(function, nil) do
+  def create_versioned_encode(function, nil, :subrecord) do
+    quote do: fn version -> unquote(function) end
+  end
+
+  def create_versioned_encode(function, nil, _) do
     quote do: fn _ -> unquote(function) end
   end
 
-  def create_versioned_encode(function, version) do
+  def create_versioned_encode(function, version, _) do
     quote do
       fn
         nil ->
@@ -23,11 +27,15 @@ defmodule Exgencode.EncodeDecode do
     end
   end
 
-  def create_versioned_decode(function, nil) do
+  def create_versioned_decode(function, nil, :subrecord) do
+    quote do: fn version -> unquote(function) end
+  end
+
+  def create_versioned_decode(function, nil, _) do
     quote do: fn _ -> unquote(function) end
   end
 
-  def create_versioned_decode(function, version) do
+  def create_versioned_decode(function, version, _) do
     quote do
       fn
         nil ->
@@ -46,7 +54,7 @@ defmodule Exgencode.EncodeDecode do
   def create_encode_fun(:subrecord, field_name, props) do
     basic_fun =
       quote do: fn %{unquote(field_name) => field_val} ->
-              <<Exgencode.Pdu.encode(field_val)::bitstring>>
+              <<Exgencode.Pdu.encode(field_val, version)::bitstring>>
             end
 
     wrap_conditional_encode(props, basic_fun)
@@ -185,7 +193,7 @@ defmodule Exgencode.EncodeDecode do
     basic_fun =
       quote do
         fn pdu, binary ->
-          {field_value, rest_binary} = Exgencode.Pdu.decode(unquote(default), binary)
+          {field_value, rest_binary} = Exgencode.Pdu.decode(unquote(default), binary, version)
           {struct!(pdu, %{unquote(field_name) => field_value}), rest_binary}
         end
       end
