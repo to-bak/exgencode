@@ -58,6 +58,14 @@ defmodule ExgencodeTest do
     assert <<10::size(16)>> == Exgencode.Pdu.encode(pdu, "1.0.0")
     assert <<10::size(16), 111::size(8)>> == Exgencode.Pdu.encode(pdu, "2.0.0")
     assert <<10::size(16), 111::size(8), 14::size(8)>> == Exgencode.Pdu.encode(pdu, "2.1.0")
+
+    nested_pdu = %TestPdu.NestedVersionedMsg{nested: pdu}
+
+    assert <<2::size(16), 10::size(16), 111::size(8), 14::size(8)>> ==
+             Exgencode.Pdu.encode(nested_pdu)
+
+    assert <<2::size(16), 10::size(16), 111::size(8)>> ==
+             Exgencode.Pdu.encode(nested_pdu, "2.0.0")
   end
 
   test "versioning decode" do
@@ -76,6 +84,14 @@ defmodule ExgencodeTest do
 
     assert {%TestPdu.VersionedMsg{}, <<111::size(8), 14::size(8)>>} =
              Exgencode.Pdu.decode(%TestPdu.VersionedMsg{}, binary, "1.0.0")
+
+    nested_pdu = %TestPdu.NestedVersionedMsg{nested: %TestPdu.VersionedMsg{}}
+    binary = <<2::size(16), 10::size(16)>>
+    assert {^nested_pdu, <<>>} = Exgencode.Pdu.decode(%TestPdu.NestedVersionedMsg{}, binary, "1.0.0")
+
+    nested_pdu = %TestPdu.NestedVersionedMsg{nested: %TestPdu.VersionedMsg{newerField: 111}}
+    binary = <<2::size(16), 10::size(16), 111::size(8)>>
+    assert {^nested_pdu, <<>>} = Exgencode.Pdu.decode(%TestPdu.NestedVersionedMsg{}, binary, "2.0.0")
   end
 
   test "versioned encode/decode symmetry" do

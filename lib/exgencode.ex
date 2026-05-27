@@ -416,7 +416,8 @@ defmodule Exgencode do
                 field_name,
                 props
               ),
-              props[:version]
+              props[:version],
+              props[:type]
             )
 
           decode_fun =
@@ -426,7 +427,8 @@ defmodule Exgencode do
                 field_name,
                 props
               ),
-              props[:version]
+              props[:version],
+              props[:type]
             )
 
           {field_name, [{:encode, encode_fun}, {:decode, decode_fun} | props]}
@@ -435,11 +437,16 @@ defmodule Exgencode do
           encode_fun =
             Exgencode.EncodeDecode.create_versioned_encode(
               Exgencode.EncodeDecode.wrap_custom_encode(field_name, props[:encode]),
-              props[:version]
+              props[:version],
+              props[:type]
             )
 
           decode_fun =
-            Exgencode.EncodeDecode.create_versioned_decode(props[:decode], props[:version])
+            Exgencode.EncodeDecode.create_versioned_decode(
+              props[:decode],
+              props[:version],
+              props[:type]
+            )
 
           {field_name,
            props

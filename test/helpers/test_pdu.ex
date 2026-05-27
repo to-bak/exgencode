@@ -34,6 +34,10 @@ defmodule Exgencode.TestPdu do
       end
     ]
 
+  defpdu NestedVersionedMsg,
+    someField: [size: 16, default: 2],
+    nested: [type: :subrecord, default: %VersionedMsg{}]
+
   defpdu EndianMsg,
     bigField: [default: 15, size: 32, endianness: :big],
     smallField: [default: 15, size: 32, endianness: :little]
