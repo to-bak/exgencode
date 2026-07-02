@@ -126,6 +126,8 @@ defmodule Exgencode.Validator do
   end
 
   def validate_pdu(pdu_name, fields) do
+    validate_offset_ordering(pdu_name, fields)
+
     total_size =
       fields
       |> Enum.reject(fn {_field_name, props} -> props[:type] == :variable end)
@@ -143,9 +145,26 @@ defmodule Exgencode.Validator do
         )
   end
 
-  defp raise_argument_error(pdu_name, field_name, msg) do
-    raise ArgumentError,
-          "Badly defined field #{inspect(field_name)} in #{inspect(pdu_name |> Macro.to_string())} - " <>
-            msg
+  defp validate_offset_ordering(pdu_name, fields) do
+    ordered_names = Enum.map(fields, fn {field_name, _props} -> field_name end)
+
+    fields
+    |> Enum.filter(fn {_field_name, props} -> props[:offset_to] != nil end)
+    |> Enum.reduce(MapSet.new(), fn {field_name, props}, seen_targets ->
+      target = props[:offset_to]
+
+      if MapSet.member?(seen_targets, target),
+        do: raise(ArgumentError, "#{inspect(pdu_name |> Macro.to_string())} multiple offset fields pointing to field #{inspect(target)} is unsupported!")
+
+      offset_index = Enum.find_index(ordered_names, &(&1 == field_name))
+      target_index = Enum.find_index(ordered_names, &(&1 == target))
+
+      if not is_nil(target_index) and target_index < offset_index,
+        do: raise(ArgumentError, "#{inspect(pdu_name |> Macro.to_string())} #{inspect(target)}: backward offsets are unsupported!")
+
+      MapSet.put(seen_targets, target)
+    end)
+
+    :ok
   end
 end
