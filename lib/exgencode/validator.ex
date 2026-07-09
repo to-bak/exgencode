@@ -154,17 +154,31 @@ defmodule Exgencode.Validator do
       target = props[:offset_to]
 
       if MapSet.member?(seen_targets, target),
-        do: raise(ArgumentError, "#{inspect(pdu_name |> Macro.to_string())} multiple offset fields pointing to field #{inspect(target)} is unsupported!")
+        do:
+          raise(
+            ArgumentError,
+            "#{inspect(pdu_name |> Macro.to_string())} multiple offset fields pointing to field #{inspect(target)} is unsupported!"
+          )
 
       offset_index = Enum.find_index(ordered_names, &(&1 == field_name))
       target_index = Enum.find_index(ordered_names, &(&1 == target))
 
       if not is_nil(target_index) and target_index < offset_index,
-        do: raise(ArgumentError, "#{inspect(pdu_name |> Macro.to_string())} #{inspect(target)}: backward offsets are unsupported!")
+        do:
+          raise(
+            ArgumentError,
+            "#{inspect(pdu_name |> Macro.to_string())} #{inspect(target)}: backward offsets are unsupported!"
+          )
 
       MapSet.put(seen_targets, target)
     end)
 
     :ok
+  end
+
+  defp raise_argument_error(pdu_name, field_name, msg) do
+    raise ArgumentError,
+          "Badly defined field #{inspect(field_name)} in #{inspect(pdu_name |> Macro.to_string())} - " <>
+            msg
   end
 end

@@ -624,7 +624,7 @@ defmodule ExgencodeTest do
   end
 
   test "multiple offsets with offset_to gap" do
-    binary = <<4, 7, 0, 2, "XY", 0, 0, 0xBE, 0xEF>>
+    binary = <<4, 8, 0, 2, "XY", 0, 0, 0xBE, 0xEF>>
 
     assert {%TestPdu.MultiOffsetMsg{
               offset_to_a: 4,
@@ -638,7 +638,7 @@ defmodule ExgencodeTest do
   test "decode raises on a backwards offset" do
     binary = <<4, 0, 3, "abc", 0xDE, 0xAD, 0xBE, 0xEF>>
 
-    assert_raise Exgencode.DecodeError, ~r/points backwards/, fn ->
+    assert_raise Exgencode.DecodeError, ~r/point backwards/, fn ->
       Exgencode.Pdu.decode(%TestPdu.OffsetMsg{}, binary)
     end
   end
@@ -646,7 +646,7 @@ defmodule ExgencodeTest do
   test "decode raises on an offset past the end of the binary" do
     binary = <<20, 0, 3, "abc", 0, 0xDE, 0xAD, 0xBE, 0xEF>>
 
-    assert_raise Exgencode.DecodeError, ~r/points past end/, fn ->
+    assert_raise Exgencode.DecodeError, ~r/cannot point outside binary/, fn ->
       Exgencode.Pdu.decode(%TestPdu.OffsetMsg{}, binary)
     end
   end
@@ -666,7 +666,7 @@ defmodule ExgencodeTest do
   end
 
   test "defining two offset fields to the same target is rejected at compile time" do
-    assert_raise ArgumentError, ~r/Multiple offset fields point to/, fn ->
+    assert_raise ArgumentError, ~r/multiple offset fields pointing/, fn ->
       defmodule BadDup do
         import Exgencode
 
@@ -679,7 +679,7 @@ defmodule ExgencodeTest do
   end
 
   test "defining an offset field after its target is rejected at compile time" do
-    assert_raise ArgumentError, ~r/must be defined before its target/, fn ->
+    assert_raise ArgumentError, ~r/backward offsets are unsupported/, fn ->
       defmodule BadOrder do
         import Exgencode
 

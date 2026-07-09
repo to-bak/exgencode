@@ -327,10 +327,12 @@ defmodule Exgencode.EncodeDecode do
             binary
 
           target_bits < cursor_bits ->
-            raise Exgencode.DecodeError, "offset field #{inspect(offset_field)} of #{inspect(field)} cannot point backwards!"
+            raise Exgencode.DecodeError,
+                  "offset field #{inspect(offset_field)} of #{inspect(field)} cannot point backwards!"
 
           target_bits - cursor_bits > bit_size(binary) ->
-            raise Exgencode.DecodeError, "offset_field #{inspect(offset_field)} cannot point outside binary!"
+            raise Exgencode.DecodeError,
+                  "offset_field #{inspect(offset_field)} cannot point outside binary!"
 
           true ->
             gap_bits = target_bits - cursor_bits
