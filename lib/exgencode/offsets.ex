@@ -87,7 +87,8 @@ defmodule Exgencode.Offsets do
                   {:subrecord, record} -> Exgencode.Pdu.sizeof_pdu(record, version, :bits)
                   val -> val
                 end)
-                |> Enum.sum() # Offsets are always in full bytes
+                # Offsets are always in full bytes
+                |> Enum.sum()
                 |> div(8)
 
               {struct!(pdu, %{unquote(field_name) => val}), version}
