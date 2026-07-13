@@ -385,18 +385,18 @@ defmodule Exgencode do
           do_decode(pdu, binary, unquote(fields_for_decodes), version, bit_size(binary))
         end
 
-        defp do_decode(pdu, binary, [{field, decode_fun} | rest], version, init_bits) do
+        defp do_decode(pdu, binary, [{field, decode_fun} | rest], version, pdu_bit_size) do
           binary =
             Exgencode.EncodeDecode.skip_to_offset(
               pdu,
               field,
               binary,
-              init_bits,
+              pdu_bit_size,
               unquote(offset_targets)
             )
 
           {new_pdu, rest_binary} = decode_fun.(version).(pdu, binary)
-          do_decode(new_pdu, rest_binary, rest, version, init_bits)
+          do_decode(new_pdu, rest_binary, rest, version, pdu_bit_size)
         end
 
         defp do_decode(pdu, rest_bin, [], _, _) do

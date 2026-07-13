@@ -127,6 +127,7 @@ defmodule Exgencode.Validator do
 
   def validate_pdu(pdu_name, fields) do
     validate_offset_ordering(pdu_name, fields)
+    validate_no_duplicate_offsets(pdu_name, fields)
 
     total_size =
       fields
@@ -146,31 +147,38 @@ defmodule Exgencode.Validator do
   end
 
   defp validate_offset_ordering(pdu_name, fields) do
-    ordered_names = Enum.map(fields, fn {field_name, _props} -> field_name end)
-
-    fields
-    |> Enum.filter(fn {_field_name, props} -> props[:offset_to] != nil end)
-    |> Enum.reduce(MapSet.new(), fn {field_name, props}, seen_targets ->
+    Enum.reduce(fields, [], fn {field_name, props}, seen_names ->
       target = props[:offset_to]
 
-      if MapSet.member?(seen_targets, target),
-        do:
-          raise(
-            ArgumentError,
-            "#{inspect(pdu_name |> Macro.to_string())} multiple offset fields pointing to field #{inspect(target)} is unsupported!"
+      if not is_nil(target) and target in seen_names do
+        raise ArgumentError,
+              "#{inspect(Macro.to_string(pdu_name))} #{inspect(target)}: backward offsets are unsupported!"
+      end
+
+      [field_name | seen_names]
+    end)
+
+    :ok
+  end
+
+  defp validate_no_duplicate_offsets(pdu_name, fields) do
+    Enum.reduce(fields, [], fn {field_name, props}, seen_targets ->
+      target = props[:offset_to]
+
+      cond do
+        is_nil(target) ->
+          seen_targets
+
+        target in seen_targets ->
+          raise_argument_error(
+            pdu_name,
+            field_name,
+            "multiple offset fields pointing to target #{inspect(target)} is unsupported!"
           )
 
-      offset_index = Enum.find_index(ordered_names, &(&1 == field_name))
-      target_index = Enum.find_index(ordered_names, &(&1 == target))
-
-      if not is_nil(target_index) and target_index < offset_index,
-        do:
-          raise(
-            ArgumentError,
-            "#{inspect(pdu_name |> Macro.to_string())} #{inspect(target)}: backward offsets are unsupported!"
-          )
-
-      MapSet.put(seen_targets, target)
+        true ->
+          [target | seen_targets]
+      end
     end)
 
     :ok
