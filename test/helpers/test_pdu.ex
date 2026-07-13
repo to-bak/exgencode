@@ -159,6 +159,7 @@ defmodule Exgencode.TestPdu do
       end,
       size: fn %CustomSizeFunPdu{custom: {size, _vals}} -> (size + 1) * 8 end
     ],
+    anotherWhyNot: [size: 8, default: 8],
     oneMore: [default: 4, size: 8]
 
   defpdu OffsetMadnessPdu,

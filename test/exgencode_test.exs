@@ -573,14 +573,14 @@ defmodule ExgencodeTest do
   test "custom size function" do
     pdu = %TestPdu.CustomSizeFunPdu{custom: {5, 1024}}
 
-    assert <<2, 8, 5, 0, 0, 0, 4, 0, 4>> = Exgencode.Pdu.encode(pdu)
+    assert <<2, 9, 5, 0, 0, 0, 4, 0, 8, 4>> = Exgencode.Pdu.encode(pdu)
 
     offsets = Exgencode.Pdu.set_offsets(pdu)
 
     assert {offsets, <<>>} ==
              Exgencode.Pdu.decode(
                %TestPdu.CustomSizeFunPdu{},
-               <<2, 8, 5, 0, 0, 0, 4, 0, 4>>,
+               <<2, 9, 5, 0, 0, 0, 4, 0, 8, 4>>,
                nil
              )
   end
