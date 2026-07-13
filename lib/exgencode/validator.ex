@@ -126,9 +126,12 @@ defmodule Exgencode.Validator do
   end
 
   def validate_pdu(pdu_name, fields) do
+    validate_pdu_size(pdu_name, fields)
     validate_offset_ordering(pdu_name, fields)
     validate_no_duplicate_offsets(pdu_name, fields)
+  end
 
+  defp validate_pdu_size(pdu_name, fields) do
     total_size =
       fields
       |> Enum.reject(fn {_field_name, props} -> props[:type] == :variable end)
