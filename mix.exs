@@ -5,7 +5,7 @@ defmodule Exgencode.Mixfile do
     [
       app: :exgencode,
       version: "2.5.3",
-      elixir: "~> 1.17",
+      elixir: "~> 1.18",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       package: package(),
