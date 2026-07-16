@@ -160,8 +160,6 @@ defmodule Exgencode.Validator do
 
       [field_name | seen_names]
     end)
-
-    :ok
   end
 
   defp validate_no_duplicate_offsets(pdu_name, fields) do
@@ -183,8 +181,6 @@ defmodule Exgencode.Validator do
           [target | seen_targets]
       end
     end)
-
-    :ok
   end
 
   defp raise_argument_error(pdu_name, field_name, msg) do
